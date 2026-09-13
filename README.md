@@ -2,7 +2,10 @@
 
 A REST API for task and project management, built to demonstrate token-based authentication, resource-scoped authorization, and API design patterns not covered by my previous two portfolio projects (session-based auth in the hotel booking app, no auth at all in the data insights app).
 
+**Live API:** https://task-management-api-fg69.onrender.com
 **Source:** https://github.com/alytawfeek2007-cell/task-management-api
+
+> Note: this is hosted on a free tier, so the app may take up to 50 seconds to "wake up" after inactivity. This is a hosting limitation, not the app itself. There's no browsable frontend — it's a pure JSON API — but you can try it yourself with the example request below.
 
 ## What it does
 
@@ -32,6 +35,14 @@ Users register and authenticate via JWT, then create projects and invite other u
 **Attachments** — files attached to a task
 - Multipart upload, capped at 5 MB, stored under a UUID-prefixed filename on disk (original filename preserved for display, never exposed in the internal path)
 - Download and delete; delete permitted for the uploader or the project Owner
+
+## Try it live
+
+```bash
+curl -X POST https://task-management-api-fg69.onrender.com/api/register \
+  -H "Content-Type: application/json" \
+  -d '{"username": "demo", "email": "demo@example.com", "password": "DemoPass123"}'
+```
 
 ## Tech stack
 
@@ -74,6 +85,14 @@ python run.py
 ```
 
 The `migrations/` folder is already part of this repo — `flask db upgrade` applies it to build the tables. Do not run `flask db init` or `flask db migrate` again; they're only needed once, and have already been done.
+
+## Deployment
+
+Deployed on Render's free tier, with a separate Render PostgreSQL instance for production data (local development still uses SQLite — see `config.py`'s `DevelopmentConfig` vs `ProductionConfig`).
+
+- **Build command:** `pip install -r requirements.txt`
+- **Start command:** `flask db upgrade && gunicorn run:app` — migrations are applied automatically before the server starts on every deploy, since the free tier has no separate shell access to run them manually
+- **Environment variables** set on the host: `SECRET_KEY`, `JWT_SECRET_KEY`, `DATABASE_URL` (provided automatically by Render's Postgres instance), and `FLASK_CONFIG=production` (selects `ProductionConfig`, which reads `DATABASE_URL` instead of falling back to SQLite)
 
 ## Running the tests
 
